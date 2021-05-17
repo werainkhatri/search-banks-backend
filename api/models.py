@@ -29,3 +29,18 @@ class BranchSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Branch
         fields = ['ifsc', 'bank_id', 'branch', 'address', 'city', 'district', 'state', 'bank_name']
+
+class Bank(models.Model):
+    # id = models.BigAutoField(primary_key=True)
+    id = models.BigIntegerField(primary_key=True)
+    name = models.CharField(max_length=49)
+
+    class Meta:
+        managed = False
+        db_table = 'banks'
+
+class BankSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Bank
+        fields = ['id', 'name']
