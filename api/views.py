@@ -4,6 +4,7 @@ from .models import Branch, Bank, BranchSerializer, BankSerializer
 from rest_framework.response import Response
 from django.db.models import Q
 from .utils import Utils
+import math
 
 # Create your views here.
 class AutocompleteViewSet(viewsets.GenericViewSet):
@@ -24,7 +25,7 @@ class AutocompleteViewSet(viewsets.GenericViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data) 
 
 
 class BranchesViewSet(viewsets.GenericViewSet):
@@ -40,6 +41,7 @@ class BranchesViewSet(viewsets.GenericViewSet):
             filtered_queryset = self.get_queryset().filter(bank_id=int(q)).order_by('ifsc')
         else:
             filtered_queryset = self.get_queryset().filter(Q(ifsc__iexact=q) | Q(branch__iexact=q) | Q(address__iexact=q) | Q(city__iexact=q) | Q(district__iexact=q) | Q(state__iexact=q) | Q(bank_name__iexact=q)).order_by('ifsc')
+        total_page_count = int(math.ceil(filtered_queryset.count() / limit))
         queryset = self.filter_queryset(filtered_queryset[offset:(offset+limit)])
 
         page = self.paginate_queryset(queryset)
@@ -48,7 +50,8 @@ class BranchesViewSet(viewsets.GenericViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        final_data = {'total_page_count': total_page_count, 'result': serializer.data};
+        return Response(final_data)
 
 
 class BankViewSet(viewsets.GenericViewSet):
